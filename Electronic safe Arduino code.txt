@@ -1,0 +1,115 @@
+#include <SPI.h>
+#include <ILI9341_due_config.h>
+#include <ILI9341_due.h>
+#include <SystemFont5x7.h>
+#include <RFID.h>
+#define TFT_RST 8
+#define TFT_DC 9
+#define TFT_CS 10
+#define ILI9341_SPI_CLKDIVIDER SPI_CLOCK_DIV2
+#define SS_PIN 11
+#define RST_PIN 12
+RFID rfid(SS_PIN, RST_PIN);
+
+ILI9341_due tft = ILI9341_due(TFT_CS, TFT_DC, TFT_RST);
+
+char Etat; //Variable for storing received data
+
+int Buzz=3;
+bool c= LOW ;
+int serNum0;
+void setup()
+{
+ SPI.begin();
+ rfid.init();
+ Serial.begin(9600); //Sets the baud for serial data transmission 
+
+ tft.begin();
+ tft.setRotation((iliRotation)3);
+ Affichage();
+ pinMode(3, OUTPUT); //Sets digital pin 13 as output pin
+}
+void loop()
+{
+ if(Serial.available()>0)
+ {
+ Etat = Serial.read();
+ Serial.println(Etat);
+ Affichage();
+ }
+if (rfid.isCard())
+{
+ if (rfid.readCardSerial())
+ {
+ serNum0=rfid.serNum[0];
+ Affichage();
+ }
+}
+ if (serNum0==40)
+ {
+ noTone(3) ;
+
+ AffichageUnlocked();
+
+ }
+
+ else if (serNum0==48)
+ {
+ tone( 3, 2000, 500);
+ WARNING();
+
+ Serial.println("False Card !");
+
+ }
+
+
+f(Etat == 'D')
+ {
+ noTone(3) ;
+ Affichage();
+ serNum0=50;
+ Etat = 'c';
+
+ }
+
+ rfid.halt();
+
+}
+void Affichage()
+{
+tft.fillScreen(ILI9341_BLACK);
+tft.setTextScale(3);
+tft.cursorTo(10, 4);
+tft.setFont(SystemFont5x7);
+tft.setTextColor(ILI9341_GOLD);
+tft.println("IDENTIFICATION");
+}
+void AffichageUnlocked()
+17
+{
+tft.fillScreen(ILI9341_BLACK);
+tft.setTextScale(4);
+tft.cursorTo(10, 4);
+tft.setFont(SystemFont5x7);
+tft.setTextColor(ILI9341_RED);
+tft.println("WELCOME!");
+}
+void WARNING()
+{
+tft.fillScreen(ILI9341_BLACK);
+tft.setTextScale(5);
+tft.setFont(SystemFont5x7);
+tft.setTextColor(ILI9341_WHITE);
+tft.cursorTo(10, 1);
+tft.println("FALSE");
+tft.cursorTo(10, 3);
+tft.println("CARD !");
+delay(500);
+tft.setTextColor(ILI9341_RED);
+tft.cursorTo(10, 1);
+tft.println("FALSE");
+tft.cursorTo(10, 3);
+tft.println("CARD !");
+}
+
+
